@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Calendário Info A 2025-2027</title>
+    <link
+      rel="shortcut icon"
+      href="./INFO_A_2025-2027__LOGO-PDF_-AZUL_ESCURO-removebg-preview.png"
+      type="image/x-icon"
+    />
+
+    <style>
+      body {
+        font-family: Arial;
+        margin: 0;
+        background: #0f172a;
+        color: white;
+      }
+      header {
+        text-align: center;
+        padding: 15px;
+        font-size: 22px;
+        background: #1e293b;
+      }
+
+      #container {
+        display: flex;
+      }
+
+      #calendar {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+        transition: 0.3s;
+      }
+
+      #calendar.shrink {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .month {
+        background: #1e293b;
+        border-radius: 15px;
+        padding: 10px;
+      }
+      .month-title {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .days-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+      }
+      .day-name {
+        font-size: 12px;
+        text-align: center;
+        opacity: 0.7;
+      }
+      .day {
+        background: #334155;
+        border-radius: 8px;
+        padding: 5px;
+        min-height: 50px;
+        cursor: pointer;
+      }
+      .day:hover {
+        transform: scale(1.05);
+      }
+
+      .red {
+        background: #ef4444;
+      }
+      .blue {
+        background: #3b82f6;
+      }
+      .green {
+        background: #22c55e;
+      }
+      .purple {
+        background: #a855f7;
+      }
+      .yellow {
+        background: #eab308;
+        color: black;
+      }
+      .gray {
+        background: #9ca3af;
+      }
+      .black {
+        background: #000;
+      }
+
+      #side {
+        width: 0;
+        background: #1e293b;
+        transition: 0.3s;
+
+        position: sticky;
+        top: 0;
+        height: 100vh;
+
+        overflow-y: auto;
+      }
+
+      #side.active {
+        width: 300px;
+        padding: 20px;
+      }
+
+      .event-item {
+        margin-top: 10px;
+      }
+      .delete-btn {
+        margin-top: 5px;
+        background: #ef4444;
+        border: none;
+        padding: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      #leaderBtn,
+      #logoutBtn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        cursor: pointer;
+      }
+      #leaderBtn {
+        background: #22c55e;
+      }
+      #logoutBtn {
+        background: red;
+        right: 90px;
+        display: none;
+      }
+
+      #modal,
+      #loginModal,
+      #confirmModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      .box {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 10px;
+        width: 300px;
+      }
+      select,
+      input,
+      button {
+        width: 100%;
+        margin-top: 10px;
+        padding: 8px;
+        border-radius: 6px;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header>Calendário Info A - 2026</header>
+
+    <div id="container">
+      <div id="calendar"></div>
+      <div id="side"></div>
+    </div>
+
+    <div id="leaderBtn">🔓</div>
+    <div id="logoutBtn">🚪</div>
+
+    <div id="modal">
+      <div class="box">
+        <h3>Novo Registro</h3>
+        <select id="type">
+          <option value="prova">Prova</option>
+          <option value="trabalho">Trabalho</option>
+          <option value="tarefa">Tarefa</option>
+          <option value="evento">Evento</option>
+          <option value="aviso">Aviso</option>
+          <option value="outros">Outros</option>
+        </select>
+        <input id="text" placeholder="Descrição" />
+        <button onclick="saveEvent()">Salvar</button>
+        <button onclick="closeModal()">Cancelar</button>
+      </div>
+    </div>
+
+    <div id="loginModal">
+      <div class="box">
+        <h3>Modo Líder</h3>
+        <input id="senha" placeholder="Senha" />
+        <button onclick="login()">Entrar</button>
+        <button onclick="closeLogin()">Cancelar</button>
+      </div>
+    </div>
+
+    <div id="confirmModal">
+      <div class="box">
+        <h3>Confirmar exclusão</h3>
+        <p>Tem certeza que deseja apagar?</p>
+        <button onclick="confirmDelete()">Sim</button>
+        <button onclick="closeConfirm()">Cancelar</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        deleteDoc,
+        doc,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAae396ryXNCC6VfEJamBiHYhAT3SYYcXA",
+        authDomain: "calendarioinfoa.firebaseapp.com",
+        projectId: "calendarioinfoa",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      let isLeader = false,
+        selectedDay = null,
+        eventsMap = {},
+        currentKey = null,
+        deleteId = null,
+        currentMonth = null,
+        currentDay = null;
+
+      const calendar = document.getElementById("calendar");
+      const side = document.getElementById("side");
+
+      const months = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+      ];
+      const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+      const year = 2026;
+
+      months.forEach((m, i) => {
+        let mDiv = document.createElement("div");
+        mDiv.className = "month";
+        mDiv.innerHTML = `<div class='month-title'>${m} 2026</div>`;
+
+        let grid = document.createElement("div");
+        grid.className = "days-grid";
+
+        days.forEach((d) => {
+          let el = document.createElement("div");
+          el.className = "day-name";
+          el.innerText = d;
+          grid.appendChild(el);
+        });
+
+        let f = new Date(year, i, 1).getDay();
+        let t = new Date(year, i + 1, 0).getDate();
+
+        for (let k = 0; k < f; k++)
+          grid.appendChild(document.createElement("div"));
+
+        for (let d = 1; d <= t; d++) {
+          let div = document.createElement("div");
+          div.className = "day";
+          div.innerHTML = `<b>${d}</b>`;
+
+          let key = `${d}-${i + 1}`;
+          div.dataset.date = key;
+
+          div.onclick = () => openSide(key, i, d);
+
+          grid.appendChild(div);
+        }
+
+        mDiv.appendChild(grid);
+        calendar.appendChild(mDiv);
+      });
+
+      function getColor(type) {
+        return {
+          prova: "red",
+          trabalho: "blue",
+          tarefa: "green",
+          evento: "purple",
+          aviso: "yellow",
+          outros: "gray",
+        }[type];
+      }
+
+      function openSide(key, month, day) {
+        currentKey = key;
+        currentMonth = month;
+        currentDay = day;
+
+        calendar.classList.add("shrink");
+        side.classList.add("active");
+
+        renderSide();
+      }
+
+      function renderSide() {
+        let week = new Date(2026, currentMonth, currentDay).toLocaleDateString(
+          "pt-BR",
+          { weekday: "long" },
+        );
+
+        let html = `<h3>${currentDay}/${currentMonth + 1}</h3><p>${week}</p>`;
+
+        if (eventsMap[currentKey]) {
+          eventsMap[currentKey].forEach((ev) => {
+            html += `
+   <div class='event-item'>
+     <div>${ev.type}: ${ev.text}</div>
+     ${isLeader ? `<button class='delete-btn' onclick="askDelete('${ev.id}')">Apagar</button>` : ""}
+   </div>`;
+          });
+        }
+
+        if (isLeader) {
+          html += `<button onclick="openModal('${currentKey}')">Adicionar</button>`;
+        }
+
+        side.innerHTML = html;
+      }
+
+      window.askDelete = (id) => {
+        deleteId = id;
+        document.getElementById("confirmModal").style.display = "flex";
+      };
+
+      window.closeConfirm = () =>
+        (document.getElementById("confirmModal").style.display = "none");
+
+      window.confirmDelete = async () => {
+        await deleteDoc(doc(db, "events", deleteId));
+        closeConfirm();
+        loadEvents();
+        renderSide();
+      };
+
+      window.openModal = (k) => {
+        selectedDay = k;
+        document.getElementById("modal").style.display = "flex";
+      };
+
+      window.closeModal = () =>
+        (document.getElementById("modal").style.display = "none");
+
+      window.saveEvent = async () => {
+        let type = document.getElementById("type").value;
+        let text = document.getElementById("text").value;
+
+        await addDoc(collection(db, "events"), {
+          date: selectedDay,
+          type,
+          text,
+        });
+
+        closeModal();
+        loadEvents();
+        renderSide();
+      };
+
+      async function loadEvents() {
+        let snap = await getDocs(collection(db, "events"));
+        eventsMap = {};
+
+        snap.forEach((d) => {
+          let v = d.data();
+          if (!eventsMap[v.date]) eventsMap[v.date] = [];
+          eventsMap[v.date].push({ ...v, id: d.id });
+        });
+
+        document.querySelectorAll(".day").forEach((div) => {
+          let k = div.dataset.date;
+          if (!k) return;
+
+          div.className = "day";
+
+          if (eventsMap[k]) {
+            if (eventsMap[k].length > 1) div.classList.add("black");
+            else div.classList.add(getColor(eventsMap[k][0].type));
+          }
+        });
+      }
+
+      leaderBtn.onclick = () =>
+        (document.getElementById("loginModal").style.display = "flex");
+
+      window.closeLogin = () =>
+        (document.getElementById("loginModal").style.display = "none");
+
+      window.login = () => {
+        if (document.getElementById("senha").value === "INFOA25") {
+          isLeader = true;
+          document.getElementById("loginModal").style.display = "none";
+          document.getElementById("logoutBtn").style.display = "flex";
+        }
+      };
+
+      logoutBtn.onclick = () => {
+        isLeader = false;
+        logoutBtn.style.display = "none";
+      };
+
+      loadEvents();
+    </script>
+  </body>
+</html>
