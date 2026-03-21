@@ -113,6 +113,9 @@
 
       .event-item {
         margin-top: 10px;
+        text-align: center;
+        border-radius: 5px;
+        background-color: #334155;
       }
       .delete-btn {
         margin-top: 5px;
@@ -175,6 +178,11 @@
         border-radius: 6px;
         border: none;
       }
+      #senha,
+      #text {
+        width: 95%;
+      }
+    
     </style>
   </head>
   <body>
@@ -192,12 +200,12 @@
       <div class="box">
         <h3>Novo Registro</h3>
         <select id="type">
-          <option value="prova">Prova</option>
-          <option value="trabalho">Trabalho</option>
-          <option value="tarefa">Tarefa</option>
-          <option value="evento">Evento</option>
-          <option value="aviso">Aviso</option>
-          <option value="outros">Outros</option>
+          <option value="Prova">Prova</option>
+          <option value="Trabalho">Trabalho</option>
+          <option value="Tarefa">Tarefa</option>
+          <option value="Evento">Evento</option>
+          <option value="Aviso">Aviso</option>
+          <option value="Outros">Outros</option>
         </select>
         <input id="text" placeholder="Descrição" />
         <button onclick="saveEvent()">Salvar</button>
@@ -311,12 +319,12 @@
 
       function getColor(type) {
         return {
-          prova: "red",
-          trabalho: "blue",
-          tarefa: "green",
-          evento: "purple",
-          aviso: "yellow",
-          outros: "gray",
+          Prova: "red",
+          Trabalho: "blue",
+          Tarefa: "green",
+          Evento: "purple",
+          Aviso: "yellow",
+          Outros: "gray",
         }[type];
       }
 
