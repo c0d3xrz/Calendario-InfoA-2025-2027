@@ -6,15 +6,18 @@
 <link rel="shortcut icon" href="./INFO_A_2025-2027__LOGO-PDF_-AZUL_ESCURO-removebg-preview.png" type="image/x-icon">
 
 <style>
+body::-webkit-scrollbar {
+    display: none;
+}
 body { font-family: Arial; margin: 0; background: #0f172a; color: white; }
-header { text-align: center; padding: 15px; font-size: 22px; background: #1e293b; }
+header { text-align: center; padding: 15px; font-size: 22px; background: #1e293b; width: 100%;}
 
 /* CALENDÁRIO */
 #calendar {
-  width: 100%;
+  width: 97%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 15px;
   padding: 20px;
   transition: all 0.3s ease;
 }
@@ -56,7 +59,7 @@ header { text-align: center; padding: 15px; font-size: 22px; background: #1e293b
   top: 0;
   right: 0;
   width: 0;
-  height: 100vh;
+  height: 100%;
   background: #1e293b;
   transition: 0.3s;
   overflow: hidden;
