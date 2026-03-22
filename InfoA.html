@@ -14,19 +14,15 @@ header { text-align: center; padding: 15px; font-size: 22px; background: #1e293b
 
 /* CALENDÁRIO */
 #calendar {
-  width: 97%;
+  width: 76%; /* ALTERADO: já inicia reduzido */
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr); /* ALTERADO: 3 por linha */
   gap: 15px;
   padding: 20px;
   transition: all 0.3s ease;
+  padding-right: 350px
 }
 
-/* QUANDO ABRE A LATERAL */
-#calendar.shrink {
-  width: calc(100% - 25%);
-  grid-template-columns: repeat(3, 1fr);
-}
 
 .month { background: #1e293b; border-radius: 15px; padding: 10px; }
 .month-title { text-align: center; font-weight: bold; margin-bottom: 10px; }
@@ -58,7 +54,7 @@ header { text-align: center; padding: 15px; font-size: 22px; background: #1e293b
   position: fixed;
   top: 0;
   right: 0;
-  width: 0;
+  width: 320px; /* ALTERADO: já inicia aberta */
   height: 100%;
   background: #1e293b;
   transition: 0.3s;
@@ -130,14 +126,7 @@ header { text-align: center; padding: 15px; font-size: 22px; background: #1e293b
   font-size: 22px;
   z-index: 9999;
 }
-#closeSideStyle{
-  position: relative;
-  color: white;
-  background: none;
-  bottom: 5px;
-  cursor: pointer;
-  font-weight: 600;
-}
+
 
 /* MODAIS */
 .modal {
@@ -287,17 +276,12 @@ function openSide(key,m,d){
   renderSide();
 }
 
-window.closeSide=()=>{
-  side.classList.remove("active");
-  calendar.classList.remove("shrink");
-};
 
 function renderSide(){
   let html=`
   <div class="side-header">
     <div style="display:flex;justify-content:space-between;">
       <h3>${currentDay}/${currentMonth+1}</h3>
-      <button id="closeSideStyle" onclick="closeSide()" style="width:auto;">X</button>
     </div>
   </div>
   <div class="side-content">
@@ -385,6 +369,7 @@ async function loadEvents(){
   });
 
   let today=new Date();
+  let todayKey = `${today.getDate()}-${today.getMonth()+1}`;
 
   document.querySelectorAll(".day").forEach(div=>{
     let key=div.dataset.date;
@@ -407,6 +392,11 @@ async function loadEvents(){
       div.classList.add("past");
     }
   });
+
+  /* ALTERADO: abre automaticamente no dia atual */
+  let m = today.getMonth();
+  let d = today.getDate();
+  openSide(todayKey, m, d);
 }
 
 loadEvents();
