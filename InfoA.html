@@ -163,6 +163,16 @@ button{
   cursor: pointer;
 }
 
+.btnConfirm {
+  background: #22c55e;
+  color: white;
+}
+
+.btnCancel {
+    background: #ef4444;
+    color: white;
+}
+
 </style>
 </head>
 
@@ -180,8 +190,8 @@ button{
   <div class="box">
     <h3>Modo Líder</h3>
     <input id="password" placeholder="Senha">
-    <button onclick="login()">Entrar</button>
-    <button onclick="closeLogin()">Cancelar</button>
+    <button class="btnConfirm" onclick="login()">Entrar</button>
+    <button class="btnCancel" onclick="closeLogin()">Cancelar</button>
   </div>
 </div>
 
@@ -198,8 +208,8 @@ button{
     </select>
     <input id="subject" placeholder="Matéria">
     <input id="text" placeholder="Descrição">
-    <button onclick="saveEvent()">Salvar</button>
-    <button onclick="closeModal()">Cancelar</button>
+    <button class="btnConfirm" onclick="saveEvent()">Salvar</button>
+    <button class="btnCancel" onclick="closeModal()">Cancelar</button>
   </div>
 </div>
 
@@ -305,7 +315,7 @@ function renderSide(){
   }
 
   if(isLeader){
-    html+=`<button onclick="openModal()">Adicionar</button>`;
+    html+=`<button style="background:yellow;" onclick="openModal()">Adicionar</button>`;
   }
 
   html+=`</div>`;
