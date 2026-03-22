@@ -368,7 +368,8 @@ async function loadEvents(){
     eventsMap[v.date].push({...v,id:d.id});
   });
 
-  let today=new Date();
+  let today = new Date();
+  today.setHours(0,0,0,0);
   let todayKey = `${today.getDate()}-${today.getMonth()+1}`;
 
   document.querySelectorAll(".day").forEach(div=>{
