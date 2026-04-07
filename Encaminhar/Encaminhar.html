@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encaminhar Registros InfoA 2025 - 2027</title>
+  <link rel="shortcut icon" href="../INFO_A_2025-2027__LOGO-PDF_-AZUL_ESCURO-removebg-preview.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Nunito", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0b1829;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(29, 161, 242, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
+    }
+
+    .card {
+      background: #132236;
+      border: 1.5px solid rgba(29, 161, 242, 0.18);
+      border-radius: 16px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card h1 {
+      font-size: 22px;
+      font-weight: 900;
+      color: #e8f4fd;
+    }
+
+    .card h1 span {
+      color: #1da1f2;
+    }
+
+    .card p {
+      font-size: 14px;
+      font-weight: 600;
+      color: #7aadcc;
+      line-height: 1.6;
+    }
+
+    #sendBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 320px;
+      padding: 14px 0;
+      border-radius: 12px;
+      border: none;
+      background: #25d366;
+      color: #fff;
+      font-family: "Nunito", sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 4px 18px rgba(37, 211, 102, 0.3);
+      letter-spacing: 0.3px;
+    }
+
+    #sendBtn:hover {
+      background: #1eaf54;
+      transform: scale(1.03);
+      box-shadow: 0 6px 24px rgba(37, 211, 102, 0.4);
+    }
+
+    #sendBtn:active {
+      transform: scale(0.97);
+    }
+
+    #sendBtn:disabled {
+      background: #1a2f47;
+      color: #7aadcc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .emoji-textarea {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Encaminhar <span>Registros</span></h1>
+    <p>
+      Busca todos os registros do calend&#225;rio e os <strong>encaminha
+      formatados</strong> via WhatsApp.
+    </p>
+    <button id="sendBtn">&#128233; Encaminhar Registros</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const app = initializeApp({
+      apiKey: "AIzaSyAae396ryXNCC6VfEJamBiHYhAT3SYYcXA",
+      authDomain: "calendarioinfoa.firebaseapp.com",
+      projectId: "calendarioinfoa",
+      storageBucket: "calendarioinfoa.firebasestorage.app",
+      messagingSenderId: "530293189709",
+      appId: "1:530293189709:web:1d9da328eddc207d438004"
+    });
+
+    const db = getFirestore(app);
+
+    const btn = document.getElementById("sendBtn");
+
+    const monthNames = [
+      "", "Janeiro", "Fevereiro", "Mar\u00E7o", "Abril",
+      "Maio", "Junho", "Julho", "Agosto",
+      "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+
+    const WA_PIN = "\uD83D\uDCCC";
+    const WA_BOX = "\uD83D\uDCE6";
+    const WA_ARROW = "\u21AA\uFE0F";
+    const WA_CALENDAR = "\uD83D\uDCC5";
+    const WA_SEND = "\uD83D\uDCE4";
+    const WA_HOURGLASS = "\u23F3";
+
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      btn.textContent = WA_HOURGLASS + " Buscando registros...";
+
+      try {
+        const snap = await getDocs(collection(db, "events"));
+
+        const today = new Date();
+        const todayDay = today.getDate();
+        const todayMonth = today.getMonth() + 1;
+
+        const events = [];
+        snap.forEach((d) => events.push(d.data()));
+
+        if (events.length === 0) {
+          alert("Nenhum registro encontrado no banco de dados.");
+          btn.disabled = false;
+          btn.textContent = WA_SEND + " Encaminhar Registros";
+          return;
+        }
+
+        // Filter: only events from today onwards
+        const futureEvents = events.filter((ev) => {
+          const [ed, em] = ev.date.split("-").map(Number);
+          if (em !== todayMonth) return em > todayMonth;
+          return ed >= todayDay;
+        });
+
+        if (futureEvents.length === 0) {
+          alert("Nenhum registro futuro encontrado.");
+          btn.disabled = false;
+          btn.textContent = WA_SEND + " Encaminhar Registros";
+          return;
+        }
+
+        // Sort events by date (day-month)
+        futureEvents.sort((a, b) => {
+          const [ad, am] = a.date.split("-").map(Number);
+          const [bd, bm] = b.date.split("-").map(Number);
+          if (am !== bm) return am - bm;
+          return ad - bd;
+        });
+
+        // Format message for WhatsApp
+        var msg = "\uD83D\uDCE3 *Recados Info A 2026*\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n";
+
+        var currentDateKey = "";
+
+        futureEvents.forEach(function(ev) {
+          // Group by date
+          if (ev.date !== currentDateKey) {
+            currentDateKey = ev.date;
+            var day = parseInt(currentDateKey.split("-")[0]);
+            var month = parseInt(currentDateKey.split("-")[1]);
+            var dateStr = day + " de " + monthNames[month];
+            msg += "\n" + WA_CALENDAR + " *" + dateStr + "*\n";
+          }
+
+          msg += "\n" + WA_PIN + "*Mat\u00E9ria* \u2014 " + (ev.subject || "\u2014") + "\n";
+          msg += WA_BOX + "*Tipo* \u2014 " + (ev.type || "\u2014") + "\n";
+          msg += WA_ARROW + "*Descri\u00E7\u00E3o* \u2014 " + (ev.text || "\u2014") + "\n";
+          msg += "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n";
+        });
+
+        // Open WhatsApp Web with the message
+        var encoded = encodeURIComponent(msg);
+        var url = "https://web.whatsapp.com/send?text=" + encoded;
+        window.open(url, "_blank");
+
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao buscar registros. Tente novamente.");
+      }
+
+      btn.disabled = false;
+      btn.textContent = WA_SEND + " Encaminhar Registros";
+    });
+  </script>
+</body>
+</html>

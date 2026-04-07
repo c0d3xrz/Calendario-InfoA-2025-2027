@@ -126,7 +126,35 @@
       }
 
       /* ── STREAK ── */
-      /* ── LOCK BTN ── */
+      /* ── HEADER ICON BUTTONS ── */
+      .header-icon-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--blue);
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        color: white;
+        font-weight: 900;
+        transition:
+          transform 0.15s,
+          background 0.15s;
+        box-shadow: 0 4px 14px rgba(29, 161, 242, 0.35);
+        text-decoration: none;
+      }
+
+      .header-icon-btn:hover {
+        transform: scale(1.08);
+        background: var(--blue-dark);
+      }
+      .header-icon-btn:active {
+        transform: scale(0.96);
+      }
+
       #actionBtn {
         display: flex;
         align-items: center;
@@ -144,6 +172,7 @@
           transform 0.15s,
           background 0.15s;
         box-shadow: 0 4px 14px rgba(29, 161, 242, 0.35);
+        font-family: inherit;
       }
 
       #actionBtn:hover {
@@ -778,6 +807,7 @@
         </div>
       </div>
       <div class="header-right">
+        <a href="./Encaminhar/Encaminhar.html" class="header-icon-btn" title="Encaminhar Registros">📨</a>
         <button id="actionBtn" title="Modo Líder">🔒</button>
       </div>
     </header>
