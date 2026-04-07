@@ -96,6 +96,44 @@
       transform: none;
     }
 
+    #weekBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 320px;
+      padding: 14px 0;
+      border-radius: 12px;
+      border: 2px solid rgba(29, 161, 242, 0.4);
+      background: rgba(29, 161, 242, 0.06);
+      color: #1da1f2;
+      font-family: "Nunito", sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s, border-color 0.15s;
+    }
+
+    #weekBtn:hover {
+      background: rgba(29, 161, 242, 0.12);
+      border-color: #1da1f2;
+      transform: scale(1.03);
+    }
+
+    #weekBtn:active {
+      transform: scale(0.97);
+    }
+
+    #weekBtn:disabled {
+      background: #1a2f47;
+      color: #7aadcc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+      border-color: transparent;
+    }
+
     .card {
       position: relative;
       padding-top: 56px;
@@ -105,8 +143,8 @@
       position: absolute;
       top: 16px;
       left: 16px;
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -152,6 +190,7 @@
       formatados</strong> via WhatsApp.
     </p>
     <button id="sendBtn">&#128233; Encaminhar Registros</button>
+    <button id="weekBtn">&#128233; Encaminhar Semana Atual</button>
   </div>
 
   <script type="module">
@@ -192,43 +231,36 @@
       window.location.href = "../InfoA.html";
     });
 
-    btn.addEventListener("click", async () => {
-      btn.disabled = true;
-      btn.textContent = WA_HOURGLASS + " Buscando registros...";
+    async function sendFiltered(filterFn, allText, doneText) {
+      var el = event.target;
+      el.disabled = true;
+      el.textContent = WA_HOURGLASS + " Buscando registros...";
 
       try {
         const snap = await getDocs(collection(db, "events"));
-
-        const today = new Date();
-        const todayDay = today.getDate();
-        const todayMonth = today.getMonth() + 1;
 
         const events = [];
         snap.forEach((d) => events.push(d.data()));
 
         if (events.length === 0) {
           alert("Nenhum registro encontrado no banco de dados.");
-          btn.disabled = false;
-          btn.textContent = WA_SEND + " Encaminhar Registros";
+          el.disabled = false;
+          el.textContent = WA_SEND + " " + allText;
           return;
         }
 
-        // Filter: only events from today onwards
-        const futureEvents = events.filter((ev) => {
-          const [ed, em] = ev.date.split("-").map(Number);
-          if (em !== todayMonth) return em > todayMonth;
-          return ed >= todayDay;
-        });
+        // Filter
+        const filtered = events.filter(filterFn);
 
-        if (futureEvents.length === 0) {
-          alert("Nenhum registro futuro encontrado.");
-          btn.disabled = false;
-          btn.textContent = WA_SEND + " Encaminhar Registros";
+        if (filtered.length === 0) {
+          alert("Nenhum registro encontrado para o per\u00EDodo selecionado.");
+          el.disabled = false;
+          el.textContent = WA_SEND + " " + allText;
           return;
         }
 
         // Sort events by date (day-month)
-        futureEvents.sort((a, b) => {
+        filtered.sort((a, b) => {
           const [ad, am] = a.date.split("-").map(Number);
           const [bd, bm] = b.date.split("-").map(Number);
           if (am !== bm) return am - bm;
@@ -240,8 +272,7 @@
 
         var currentDateKey = "";
 
-        futureEvents.forEach(function(ev) {
-          // Group by date
+        filtered.forEach(function(ev) {
           if (ev.date !== currentDateKey) {
             currentDateKey = ev.date;
             var day = parseInt(currentDateKey.split("-")[0]);
@@ -269,8 +300,48 @@
         alert("Erro ao buscar registros. Tente novamente.");
       }
 
-      btn.disabled = false;
-      btn.textContent = WA_SEND + " Encaminhar Registros";
+      el.disabled = false;
+      el.textContent = WA_SEND + " " + doneText;
+    }
+
+    // All records (from today onwards)
+    btn.addEventListener("click", async () => {
+      const today = new Date();
+      const todayDay = today.getDate();
+      const todayMonth = today.getMonth() + 1;
+
+      await sendFiltered(
+        (ev) => {
+          const [ed, em] = ev.date.split("-").map(Number);
+          if (em !== todayMonth) return em > todayMonth;
+          return ed >= todayDay;
+        },
+        "Encaminhar Registros",
+        "Encaminhar Registros"
+      );
+    });
+
+    // Current week (Sunday to Saturday)
+    const weekBtn = document.getElementById("weekBtn");
+    weekBtn.addEventListener("click", async () => {
+      const today = new Date();
+      const dayOfWeek = today.getDay(); // 0 = Sunday
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() - dayOfWeek);
+
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+
+      await sendFiltered(
+        (ev) => {
+          const [ed, em] = ev.date.split("-").map(Number);
+          const eventDate = new Date(2026, em - 1, ed);
+          return eventDate >= new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
+              && eventDate <= new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+        },
+        "Encaminhar Semana Atual",
+        "Encaminhar Semana Atual"
+      );
     });
   </script>
 </body>
