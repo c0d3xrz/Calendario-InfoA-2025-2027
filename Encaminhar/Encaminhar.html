@@ -96,6 +96,44 @@
       transform: none;
     }
 
+    .card {
+      position: relative;
+      padding-top: 56px;
+    }
+
+    #backBtn {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.15s;
+    }
+
+    #backBtn:hover {
+      transform: scale(1.1);
+    }
+
+    #backBtn:active {
+      transform: scale(0.95);
+    }
+
+    #backBtn svg path {
+      stroke: #7aadcc;
+      transition: stroke 0.15s;
+    }
+
+    #backBtn:hover svg path {
+      stroke: #1da1f2;
+    }
+
     .emoji-textarea {
       font-size: 14px;
     }
@@ -103,6 +141,11 @@
 </head>
 <body>
   <div class="card">
+    <button id="backBtn" title="Voltar">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14.9998 19.9201L8.47984 13.4001C7.70984 12.6301 7.70984 11.3701 8.47984 10.6001L14.9998 4.08008" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <h1>Encaminhar <span>Registros</span></h1>
     <p>
       Busca todos os registros do calend&#225;rio e os <strong>encaminha
@@ -144,6 +187,10 @@
     const WA_CALENDAR = "\uD83D\uDCC5";
     const WA_SEND = "\uD83D\uDCE4";
     const WA_HOURGLASS = "\u23F3";
+
+    document.getElementById("backBtn").addEventListener("click", () => {
+      window.location.href = "../InfoA.html";
+    });
 
     btn.addEventListener("click", async () => {
       btn.disabled = true;
