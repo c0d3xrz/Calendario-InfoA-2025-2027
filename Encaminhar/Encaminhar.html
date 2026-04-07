@@ -209,9 +209,12 @@
           msg += "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n";
         });
 
-        // Open WhatsApp Web with the message
+        // Open WhatsApp: app on mobile, Web on desktop
         var encoded = encodeURIComponent(msg);
-        var url = "https://web.whatsapp.com/send?text=" + encoded;
+        var isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+        var url = isMobile
+          ? "whatsapp://send?text=" + encoded
+          : "https://web.whatsapp.com/send?text=" + encoded;
         window.open(url, "_blank");
 
       } catch (err) {
